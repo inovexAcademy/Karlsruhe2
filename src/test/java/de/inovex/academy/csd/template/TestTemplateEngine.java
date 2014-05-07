@@ -44,4 +44,12 @@ public class TestTemplateEngine {
 		parameter.put("zustand", "schlecht");
 		templateEngine.render(parameter);
 	}
+	
+	@Test(expected=PlaceholderNotFoundException.class)
+	public void testRenderNotFoundPlaceholder() {
+		TemplateEngine templateEngine = new TemplateEngine("Hallo ${name}. Wie geht's Dir, ${name}? !${antwort}!");
+		Map<String, String> parameter = new HashMap<String, String>();
+		parameter.put("name", "Daniel");
+		templateEngine.render(parameter);
+	}
 }
