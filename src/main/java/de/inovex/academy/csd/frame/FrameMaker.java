@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FrameMaker {
+	
+	private static final String FRAMECHAR = "*";
 
 	public List<String> makeFrame(List<String> stringList) {
 		if (null != stringList) {
@@ -12,12 +14,21 @@ public class FrameMaker {
 			String frameLine = frameLine(length);
 			result.add(frameLine);
 			for (String stringElement : stringList) {
-				result.add("*" + stringElement + "*");
+				result.add(buildLineString(length, stringElement));
 			}
 			result.add(frameLine);
 			return result;
 		}
 		return null;
+	}
+
+	public String buildLineString(int length, String stringElement) {
+		int laengeLeerzeichen = length - stringElement.length() -2;
+		StringBuffer sb = new StringBuffer();
+		for (int ii = 0; ii<laengeLeerzeichen;ii++) {
+			sb.append(" ");
+		}
+		return FRAMECHAR + stringElement +  sb.toString() + FRAMECHAR;
 	}
 
 	public int computeFrameWidth(List<String> stringList) {
@@ -32,7 +43,7 @@ public class FrameMaker {
 	public String frameLine(int length) {
 		StringBuffer sb = new StringBuffer();
 		for (int i = 0; i < length; i++) {
-			sb.append("*");
+			sb.append(FRAMECHAR);
 		}
 		return sb.toString();
 	}

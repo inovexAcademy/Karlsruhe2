@@ -29,6 +29,12 @@ public class FrameTest {
 	public void testFrameLine() {
 		assertThat(frameMaker.frameLine(8), equalTo("********"));
 	}
+
+	@Test
+	public void testBuildLineString() {
+		assertThat(frameMaker.buildLineString(8,"er"), equalTo("*er    *"));
+		assertThat(frameMaker.buildLineString(4,"te"), equalTo("*te*"));
+	}
 	
 	@Test
 	public void testFrame() {
@@ -42,6 +48,25 @@ public class FrameTest {
 		
 		stringList2.add("test1");
 		assertThat(frameMaker.makeFrame(stringList2), equalTo(Arrays.asList("*******", "*test2*", "*test1*", "*******")));
+		
+		stringList2.add("test1234");
+		assertThat(frameMaker.makeFrame(stringList2), equalTo(Arrays.asList(
+				"**********", 
+				"*test2   *", 
+				"*test1   *", 
+				"*test1234*", 
+				"**********")));
+
+		stringList2.add("t");
+		stringList2.add("test1234567890");
+		assertThat(frameMaker.makeFrame(stringList2), equalTo(Arrays.asList(
+				"****************", 
+				"*test2         *", 
+				"*test1         *", 
+				"*test1234      *", 
+				"*t             *", 
+				"*test1234567890*", 
+				"****************")));
 	}
 
 }
