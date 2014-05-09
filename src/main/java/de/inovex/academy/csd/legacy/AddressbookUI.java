@@ -1,9 +1,5 @@
 package de.inovex.academy.csd.legacy;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,7 +44,7 @@ public class AddressbookUI extends UI {
 	static final String FNAME = "First Name";
 	static final String LNAME = "Last Name";
 	static final String COMPANY = "Company";
-	private static final String[] fieldNames = new String[] { FNAME, LNAME,
+	static final String[] fieldNames = new String[] { FNAME, LNAME,
 			COMPANY, "Mobile Phone", "Work Phone", "Home Phone", "Work Email",
 			"Home Email", "Street", "City", "Zip", "State", "Country" };
 
@@ -243,33 +239,8 @@ public class AddressbookUI extends UI {
 	 * data.
 	 */
 	private static IndexedContainer createSQLDatasource() {
-		IndexedContainer ic = new IndexedContainer();
-
-		for (String p : fieldNames) {
-			ic.addContainerProperty(p, String.class, "");
-		}
-
-		try {
-			Connection conn = DriverManager.getConnection(
-					"jdbc:hsqldb:file:db/persons", "SA", "");
-			PreparedStatement stmt = conn
-					.prepareStatement("SELECT first_name, last_name, company, mobile_phone, work_phone, home_phone, work_email, home_email, street, city, zip, state, country FROM person");
-			ResultSet rs = stmt.executeQuery();
-			while (rs.next()) {
-				Object id = ic.addItem();
-				for (String fieldName : fieldNames) {
-					String value = rs.getString(fieldName.replaceAll(" ", "_")
-							.toLowerCase());
-					if (value != null) {
-						ic.getContainerProperty(id, fieldName).setValue(value);
-					}
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		return ic;
+		SQLDatasourceCreator creator = new SQLDatasourceCreator();
+		return creator.createSQLDatasource();
 	}
 
 }
