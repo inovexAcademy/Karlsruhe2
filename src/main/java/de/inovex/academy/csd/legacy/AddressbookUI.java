@@ -4,10 +4,10 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.vaadin.annotations.Title;
-import com.vaadin.data.Container.Filter;
-import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.fieldgroup.FieldGroup;
@@ -19,6 +19,7 @@ import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.Field;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
@@ -44,9 +45,9 @@ public class AddressbookUI extends UI {
 	private FormLayout editorLayout = new FormLayout();
 	private FieldGroup editorFields = new FieldGroup();
 
-	private static final String FNAME = "First Name";
-	private static final String LNAME = "Last Name";
-	private static final String COMPANY = "Company";
+	static final String FNAME = "First Name";
+	static final String LNAME = "Last Name";
+	static final String COMPANY = "Company";
 	private static final String[] fieldNames = new String[] { FNAME, LNAME,
 			COMPANY, "Mobile Phone", "Work Phone", "Home Phone", "Work Email",
 			"Home Email", "Street", "City", "Zip", "State", "Country" };
@@ -113,14 +114,16 @@ public class AddressbookUI extends UI {
 		editorLayout.setMargin(true);
 		editorLayout.setVisible(false);
 	}
-	
+
 	private void initEditor() {
 
 		editorLayout.addComponent(removeContactButton);
 
 		/* User interface can be created dynamically to reflect underlying data. */
+		FieldGenerator fieldGen = new FieldGenerator();
 		for (String fieldName : fieldNames) {
-			TextField field = new TextField(fieldName);
+
+			Field<?> field = fieldGen.generateField(fieldName);
 			editorLayout.addComponent(field);
 			field.setWidth("100%");
 
@@ -169,33 +172,11 @@ public class AddressbookUI extends UI {
 
 				/* Reset the filter for the contactContainer. */
 				contactContainer.removeAllContainerFilters();
-				contactContainer.addContainerFilter(new ContactFilter(event
-						.getText()));
+				ContactFilter filter = new ContactFilter(event.getText());
+				filter.setFieldNames(fieldNames);
+				contactContainer.addContainerFilter(filter);
 			}
 		});
-	}
-
-	/*
-	 * A custom filter for searching names and companies in the
-	 * contactContainer.
-	 */
-	private class ContactFilter implements Filter {
-		private String needle;
-
-		public ContactFilter(String needle) {
-			this.needle = needle.toLowerCase();
-		}
-
-		public boolean passesFilter(Object itemId, Item item) {
-			String haystack = ("" + item.getItemProperty(FNAME).getValue()
-					+ item.getItemProperty(LNAME).getValue() + item
-					.getItemProperty(COMPANY).getValue()).toLowerCase();
-			return haystack.contains(needle);
-		}
-
-		public boolean appliesToProperty(Object id) {
-			return true;
-		}
 	}
 
 	private void initAddRemoveButtons() {
@@ -250,7 +231,7 @@ public class AddressbookUI extends UI {
 				if (contactId != null)
 					editorFields.setItemDataSource(contactList
 							.getItem(contactId));
-				
+
 				editorLayout.setVisible(contactId != null);
 			}
 		});
@@ -267,15 +248,18 @@ public class AddressbookUI extends UI {
 		for (String p : fieldNames) {
 			ic.addContainerProperty(p, String.class, "");
 		}
-		
+
 		try {
-			Connection conn = DriverManager.getConnection("jdbc:hsqldb:file:db/persons", "SA", "");
-			PreparedStatement stmt = conn.prepareStatement("SELECT first_name, last_name, company, mobile_phone, work_phone, home_phone, work_email, home_email, street, city, zip, state, country FROM person");
+			Connection conn = DriverManager.getConnection(
+					"jdbc:hsqldb:file:db/persons", "SA", "");
+			PreparedStatement stmt = conn
+					.prepareStatement("SELECT first_name, last_name, company, mobile_phone, work_phone, home_phone, work_email, home_email, street, city, zip, state, country FROM person");
 			ResultSet rs = stmt.executeQuery();
 			while (rs.next()) {
 				Object id = ic.addItem();
-				for (String fieldName: fieldNames) {
-					String value = rs.getString(fieldName.replaceAll(" ", "_").toLowerCase());
+				for (String fieldName : fieldNames) {
+					String value = rs.getString(fieldName.replaceAll(" ", "_")
+							.toLowerCase());
 					if (value != null) {
 						ic.getContainerProperty(id, fieldName).setValue(value);
 					}
